@@ -1,22 +1,22 @@
-mina-sidekiq
+mina-sidekiq-upstart
 ============
 
-[![Build Status](https://travis-ci.org/Mic92/mina-sidekiq.png?branch=master)](https://travis-ci.org/Mic92/mina-sidekiq)
+[![Build Status](https://travis-ci.org/Mic92/mina-sidekiq-upstart.png?branch=master)](https://travis-ci.org/Mic92/mina-sidekiq-upstart)
 
-mina-sidekiq is a gem that adds tasks to aid in the deployment of [Sidekiq] (http://mperham.github.com/sidekiq/)
+mina-sidekiq-upstart is a gem that adds tasks to aid in the deployment of [Sidekiq] (http://mperham.github.com/sidekiq/)
 using [Mina] (http://nadarei.co/mina).
 
 # Getting Start
 
 ## Installation
 
-    gem install mina-sidekiq
+    gem install mina-sidekiq-upstart
 
 ## Example
 
 ## Usage example
 
-    require 'mina_sidekiq/tasks'
+    require 'mina_sidekiq_upstart/tasks'
     ...
     # to make logs persistent between deploys
     set :shared_paths, ['log']

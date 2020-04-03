@@ -1,6 +1,6 @@
 require 'mina'
 require 'mina/git'
-require 'mina_sidekiq/tasks'
+require 'mina_sidekiq_upstart/tasks'
 require 'mina/git'
 require 'mina/bundler'
 require 'mina/rvm'
@@ -13,7 +13,7 @@ set :ssh_options, '-o StrictHostKeyChecking=no'
 
 set :domain, 'localhost'
 set :deploy_to, "#{Dir.pwd}/deploy"
-set :repository, 'https://github.com/Mic92/mina-sidekiq-test-rails.git'
+set :repository, 'https://github.com/Mic92/mina-sidekiq-upstart-test-rails.git'
 set :keep_releases, 2
 set :sidekiq_processes, 2
 

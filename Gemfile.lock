@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    mina-sidekiq (0.3.1)
+    mina-sidekiq-upstart (0.3.1)
       mina
 
 GEM
@@ -17,4 +17,4 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  mina-sidekiq!
+  mina-sidekiq-upstart!

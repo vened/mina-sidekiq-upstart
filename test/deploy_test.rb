@@ -1,6 +1,6 @@
 require "test_helper"
 
-describe "mina_sidekiq" do
+describe "mina_sidekiq_upstart" do
   before do
     @old_cwd = Dir.pwd
     @env_root = TEST_ROOT.join("..", "test_env")

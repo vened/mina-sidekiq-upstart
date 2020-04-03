@@ -2,7 +2,7 @@
 # Adds settings and tasks for managing Sidekiq workers.
 #
 # ## Usage example
-#     require 'mina_sidekiq/tasks'
+#     require 'mina_sidekiq_upstart/tasks'
 #     ...
 #     task :setup do
 #       # sidekiq needs a place to store its pid file

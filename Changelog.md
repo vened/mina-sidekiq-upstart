@@ -11,7 +11,7 @@ Changelog
 
 Breaking Changes:
 
-* to load the tasks requiring 'mina_sidekiq/tasks' is needed now
+* to load the tasks requiring 'mina_sidekiq_upstart/tasks' is needed now
 
 Enhancements:
 
