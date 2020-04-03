@@ -81,7 +81,7 @@ namespace :sidekiq do
   # ### sidekiq:quiet
   desc "Quiet sidekiq (stop accepting new work)"
   task :quiet => :environment do
-    queue %[echo "-----> Quiet sidekiq (stop accepting new work)"]
+    comment 'Quiet sidekiq (stop accepting new work)'
     in_path(fetch(:current_path)) do
       for_each_process do |pid_file, idx|
         command %{
@@ -123,7 +123,7 @@ namespace :sidekiq do
         #  cd "#{deploy_to}/#{current_path}"
         #  #{echo_cmd %[#{sidekiq} -d -e #{rails_env} -C #{sidekiq_config} -i #{idx} -P #{pid_file} -L #{sidekiq_log}] }
         #}
-        queue %[sudo start sidekiq app=#{fetch(:current_path)} index=0 ]
+        command %[sudo start sidekiq app=#{fetch(:current_path)} index=0]
       end
     end
   end
