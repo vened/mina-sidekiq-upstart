@@ -30,91 +30,104 @@ require 'mina/rails'
 
 # ### sidekiq
 # Sets the path to sidekiq.
-set_default :sidekiq, lambda { "#{bundle_bin} exec sidekiq" }
+set :sidekiq, -> { "#{fetch(:bundle_bin)} exec sidekiq" }
 
 # ### sidekiqctl
 # Sets the path to sidekiqctl.
-set_default :sidekiqctl, lambda { "#{bundle_prefix} sidekiqctl" }
+set :sidekiqctl, -> { "#{fetch(:bundle_bin)} exec sidekiqctl" }
 
 # ### sidekiq_timeout
 # Sets a upper limit of time a worker is allowed to finish, before it is killed.
-set_default :sidekiq_timeout, 10
+set :sidekiq_timeout, 11
 
 # ### sidekiq_config
 # Sets the path to the configuration file of sidekiq
-set_default :sidekiq_config, lambda { "#{deploy_to}/#{current_path}/config/sidekiq.yml" }
+set :sidekiq_config, -> { "#{fetch(:current_path)}/config/sidekiq.yml" }
+
+set :sidekiq_configs, -> {
+  [
+      # "#{fetch(:current_path)}/config/sidekiq_1.yml",
+      # "#{fetch(:current_path)}/config/sidekiq_2.yml"
+  ]
+}
 
 # ### sidekiq_log
 # Sets the path to the log file of sidekiq
 #
-# To disable logging set it to "/dev/null"
-set_default :sidekiq_log, lambda { "#{deploy_to}/#{current_path}/log/sidekiq.log" }
+set :sidekiq_log, -> { "#{fetch(:current_path)}/log/sidekiq.log" }
 
 # ### sidekiq_pid
 # Sets the path to the pid file of a sidekiq worker
-set_default :sidekiq_pid, lambda { "#{deploy_to}/#{shared_path}/pids/sidekiq.pid" }
+set :sidekiq_pid, -> { "#{fetch(:shared_path)}/pids/sidekiq.pid" }
 
 # ### sidekiq_processes
 # Sets the number of sidekiq processes launched
-set_default :sidekiq_processes, 1
+set :sidekiq_processes, 1
 
 # ## Control Tasks
 namespace :sidekiq do
   def for_each_process(&block)
-    sidekiq_processes.times do |idx|
+    fetch(:sidekiq_processes).times do |idx|
       pid_file = if idx == 0
-                   sidekiq_pid
+                   fetch(:sidekiq_pid)
                  else
-                   "#{sidekiq_pid}-#{idx}"
+                   "#{fetch(:sidekiq_pid)}-#{idx}"
                  end
       yield(pid_file, idx)
     end
   end
 
+
   # ### sidekiq:quiet
   desc "Quiet sidekiq (stop accepting new work)"
   task :quiet => :environment do
     queue %[echo "-----> Quiet sidekiq (stop accepting new work)"]
-    for_each_process do |pid_file, idx|
-      queue %{
-        if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then
-          cd "#{deploy_to}/#{current_path}"
-          #{echo_cmd %{#{sidekiqctl} quiet #{pid_file}} }
-        else
-          echo 'Skip quiet command (no pid file found)'
-        fi
-      }
+    in_path(fetch(:current_path)) do
+      for_each_process do |pid_file, idx|
+        command %{
+          if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then
+            #{fetch(:sidekiqctl)} quiet #{pid_file}
+          else
+            echo 'Skip quiet command (no pid file found)'
+          fi
+        }.strip
+      end
     end
   end
 
+
   # ### sidekiq:stop
   desc "Stop sidekiq"
-  task :stop => :environment do
-    queue %[echo "-----> Stop sidekiq"]
-    for_each_process do |pid_file, idx|
-      queue %[
-        if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then
-          cd "#{deploy_to}/#{current_path}"
-          #{echo_cmd %[#{sidekiqctl} stop #{pid_file} #{sidekiq_timeout}]}
-        else
-          echo 'Skip stopping sidekiq (no pid file found)'
-        fi
-      ]
+  task :stop => :remote_environment do
+    comment 'Stop sidekiq'
+    in_path(fetch(:current_path)) do
+      for_each_process do |pid_file, idx|
+        command %{
+          if [ -f #{pid_file} ] && kill -0 `cat #{pid_file}`> /dev/null 2>&1; then
+            #{fetch(:sidekiqctl)} stop #{pid_file} #{fetch(:sidekiq_timeout)}
+          else
+            echo 'Skip stopping sidekiq (no pid file found)'
+          fi
+        }.strip
+      end
     end
   end
 
   # ### sidekiq:start
   desc "Start sidekiq"
-  task :start => :environment do
-    queue %[echo "-----> Start sidekiq"]
-    for_each_process do |pid_file, idx|
-      #queue %{
-      #  cd "#{deploy_to}/#{current_path}"
-      #  #{echo_cmd %[#{sidekiq} -d -e #{rails_env} -C #{sidekiq_config} -i #{idx} -P #{pid_file} -L #{sidekiq_log}] }
-      #}
-      queue %[sudo start sidekiq app=#{deploy_to}/#{current_path} index=0 ]
+  task :start => :remote_environment do
+    comment 'Start sidekiq'
+    in_path(fetch(:current_path)) do
+      for_each_process do |pid_file, idx|
+        #queue %{
+        #  cd "#{deploy_to}/#{current_path}"
+        #  #{echo_cmd %[#{sidekiq} -d -e #{rails_env} -C #{sidekiq_config} -i #{idx} -P #{pid_file} -L #{sidekiq_log}] }
+        #}
+        queue %[sudo start sidekiq app=#{fetch(:current_path)} index=0 ]
+      end
     end
   end
+
 
   # ### sidekiq:restart
   desc "Restart sidekiq"
